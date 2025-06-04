@@ -1,7 +1,6 @@
---script_key = "XK39-FJ28-ZLQ1"
---loadstring(game:HttpGet("https://raw.githubusercontent.com/ADMINDOGG/loader/main/main.lua"))()
-
-local script_key = _G.script_key or script_key
+local script_key = "XK39-FJ28-ZLQ1" -- ใส่ Key ของคุณตรงนี้
+-- หรือใช้ _G.script_key ถ้าต้องการ
+script_key = _G.script_key or script_key
 if not script_key then
     warn("❌ ไม่พบตัวแปร script_key")
     return
@@ -130,17 +129,17 @@ local function createHWIDGUI(hwid)
     corner.CornerRadius = UDim.new(0, 8)
     corner.Parent = mainFrame
     
-    -- Shadow Effect
-    local shadow = Instance.new("ImageLabel")
-    shadow.Name = "Shadow"
-    shadow.Size = UDim2.new(1, 20, 1, 20)
-    shadow.Position = UDim2.new(0, -10, 0, -10)
-    shadow.BackgroundTransparency = 1
-    shadow.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
-    shadow.ImageColor3 = COLORS.SHADOW
-    shadow.ImageTransparency = 0.8
-    shadow.ZIndex = mainFrame.ZIndex - 1
-    shadow.Parent = mainFrame
+    -- Shadow Effect (ลบออกเพราะอาจทำให้ Error)
+    -- local shadow = Instance.new("ImageLabel")
+    -- shadow.Name = "Shadow"  
+    -- shadow.Size = UDim2.new(1, 20, 1, 20)
+    -- shadow.Position = UDim2.new(0, -10, 0, -10)
+    -- shadow.BackgroundTransparency = 1
+    -- shadow.Image = "rbxasset://textures/ui/GuiImagePlaceholder.png"
+    -- shadow.ImageColor3 = COLORS.SHADOW
+    -- shadow.ImageTransparency = 0.8
+    -- shadow.ZIndex = mainFrame.ZIndex - 1
+    -- shadow.Parent = mainFrame
     
     -- Border Glow
     local borderGlow = Instance.new("UIStroke")
@@ -366,16 +365,22 @@ local function createHWIDGUI(hwid)
         end
     end)
     
-    -- Button Animations
+    -- Button Animations (ปรับให้ปลอดภัยขึ้น)
     local function animateButton(button, hoverColor, normalColor)
+        local originalSize = button.Size
+        
         button.MouseEnter:Connect(function()
-            TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = hoverColor}):Play()
-            TweenService:Create(button, TweenInfo.new(0.1), {Size = button.Size + UDim2.new(0, 4, 0, 2)}):Play()
+            pcall(function()
+                TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = hoverColor}):Play()
+                TweenService:Create(button, TweenInfo.new(0.1), {Size = originalSize + UDim2.new(0, 4, 0, 2)}):Play()
+            end)
         end)
         
         button.MouseLeave:Connect(function()
-            TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = normalColor}):Play()
-            TweenService:Create(button, TweenInfo.new(0.1), {Size = button.Size - UDim2.new(0, 4, 0, 2)}):Play()
+            pcall(function()
+                TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = normalColor}):Play()
+                TweenService:Create(button, TweenInfo.new(0.1), {Size = originalSize}):Play()
+            end)
         end)
     end
     
@@ -389,15 +394,14 @@ local function createHWIDGUI(hwid)
         copyButton.Text = "[ COPIED! ]"
         copyButton.TextColor3 = COLORS.WARNING
         
-        -- Success sound effect
-        spawn(function()
+        -- Success sound effect (ปรับให้ไม่ Error)
+        pcall(function()
             local sound = Instance.new("Sound")
-            sound.SoundId = "rbxasset://sounds/electronicpingshort.wav"
+            sound.SoundId = "rbxassetid://131961136" -- เปลี่ยนเป็น SoundId ที่ใช้ได้
             sound.Volume = 0.5
-            sound.Parent = SoundService
+            sound.Parent = game:GetService("Workspace")
             sound:Play()
-            sound.Ended:Wait()
-            sound:Destroy()
+            game:GetService("Debris"):AddItem(sound, 2)
         end)
         
         wait(2)
@@ -406,30 +410,42 @@ local function createHWIDGUI(hwid)
     end)
     
     discordButton.MouseButton1Click:Connect(function()
-        setclipboard("https://discord.gg/YOUR_DISCORD_INVITE") -- เปลี่ยนเป็น Discord ของคุณ
-        discordButton.Text = "[ LINK_COPIED ]"
-        discordButton.TextColor3 = COLORS.WARNING
-        wait(2)
-        discordButton.Text = "[ DISCORD_SUPPORT ]"
-        discordButton.TextColor3 = Color3.fromRGB(100, 150, 255)
+        pcall(function()
+            setclipboard("https://discord.gg/YOUR_DISCORD_INVITE") -- เปลี่ยนเป็น Discord ของคุณ
+            discordButton.Text = "[ LINK_COPIED ]"
+            discordButton.TextColor3 = COLORS.WARNING
+            wait(2)
+            if discordButton and discordButton.Parent then
+                discordButton.Text = "[ DISCORD_SUPPORT ]"
+                discordButton.TextColor3 = Color3.fromRGB(100, 150, 255)
+            end
+        end)
     end)
     
     closeButton.MouseButton1Click:Connect(function()
-        -- Fade out animation
-        local fadeOut = TweenService:Create(screenGui, TweenInfo.new(0.5), {BackgroundTransparency = 1})
-        local frameOut = TweenService:Create(mainFrame, TweenInfo.new(0.5), {
-            BackgroundTransparency = 1,
-            Size = UDim2.new(0, 0, 0, 0),
-            Position = UDim2.new(0.5, 0, 0.5, 0)
-        })
-        
-        fadeOut:Play()
-        frameOut:Play()
-        
-        frameOut.Completed:Connect(function()
-            screenGui:Destroy()
-            matrixGui:Destroy()
-            blur:Destroy()
+        -- Fade out animation (ปรับให้ปลอดภัย)
+        pcall(function()
+            local fadeOut = TweenService:Create(overlay, TweenInfo.new(0.5), {BackgroundTransparency = 1})
+            local frameOut = TweenService:Create(mainFrame, TweenInfo.new(0.5), {
+                BackgroundTransparency = 1,
+                Size = UDim2.new(0, 0, 0, 0),
+                Position = UDim2.new(0.5, 0, 0.5, 0)
+            })
+            
+            fadeOut:Play()
+            frameOut:Play()
+            
+            frameOut.Completed:Connect(function()
+                if screenGui and screenGui.Parent then
+                    screenGui:Destroy()
+                end
+                if matrixGui and matrixGui.Parent then
+                    matrixGui:Destroy()
+                end
+                if blur and blur.Parent then
+                    blur:Destroy()
+                end
+            end)
         end)
     end)
     
@@ -483,7 +499,7 @@ if validKeys[script_key] == hwid then
     
     -- โหลดสคริปต์จริง
     wait(1)
-    print("DONE NiGGA")
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/ADMINDOGG/loader/main/main.lua"))()
 else
     warn("❌ Key หรือ HWID ไม่ถูกต้อง")
     
