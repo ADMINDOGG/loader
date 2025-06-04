@@ -1,34 +1,36 @@
--- ใส่ key ของคุณตรงนี้
-if not script_key then
-	warn("❌ กรุณาใส่ script_key ก่อนรันสคริปต์นี้")
+-- ⚙️ โหลดค่าคีย์จากตัวแปรภายนอก (ผู้ใช้ต้องมี script_key = "..."; ไว้ก่อน)
+local key = _G.script_key or script_key
+if not key then
+	warn("❌ ไม่พบตัวแปร script_key")
 	return
 end
 
--- ดึง Key ที่ถูกต้องจาก Pastebin
-local correctKey = game:HttpGet("https://pastebin.com/raw/cqUf9H1F") -- เปลี่ยนลิงก์นี้
-
--- ดึง HWID จากผู้ใช้ (ClientId)
+-- 🎯 ดึง HWID ของผู้เล่น
 local hwid = game:GetService("RbxAnalyticsService"):GetClientId()
 
--- ดึง HWID ที่ได้รับอนุญาตจาก Pastebin
-local whitelistedHWIDs = game:HttpGet("https://pastebin.com/raw/C6NbcSDg")
+-- 🌐 ดึงข้อมูลจาก Pastebin (Key:HWID)
+local success, data = pcall(function()
+	return game:HttpGet("https://pastebin.com/raw/C6NbcSDg")
+end)
 
--- แปลง HWID เป็น table
-local hwidList = {}
-for line in whitelistedHWIDs:gmatch("[^\r\n]+") do
-	hwidList[line] = true
+if not success then
+	warn("❌ ดึงข้อมูลคีย์ไม่ได้: " .. tostring(data))
+	return
 end
 
--- ตรวจสอบ Key และ HWID พร้อมกัน
-if script_key == correctKey then
-	if hwidList[hwid] then
-		print("✅ Key และ HWID ถูกต้อง กำลังโหลด Script จริง...")
-		
-		-- โหลด script จริง
-		print("NIGGA")
-	else
-		warn("❌ HWID นี้ไม่ได้รับอนุญาต")
+-- 🔍 แปลงข้อมูลเป็นตาราง key -> hwid
+local validKeys = {}
+for line in data:gmatch("[^\r\n]+") do
+	local k, v = line:match("([^:]+):(.+)")
+	if k and v then
+		validKeys[k] = v
 	end
+end
+
+-- ✅ ตรวจสอบว่า key นี้ตรงกับ HWID หรือไม่
+if validKeys[key] == hwid then
+	print("✅ Key และ HWID ถูกต้อง กำลังโหลดสคริปต์จริง...")
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/ADMINDOGG/loader/main/main.lua"))()
 else
-	warn("❌ Key ไม่ถูกต้อง")
+	warn("❌ Key หรือ HWID ไม่ถูกต้อง")
 end
