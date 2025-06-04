@@ -1,36 +1,11 @@
--- ⚙️ โหลดค่าคีย์จากตัวแปรภายนอก (ผู้ใช้ต้องมี script_key = "..."; ไว้ก่อน)
-local key = _G.script_key or script_key
-if not key then
-	warn("❌ ไม่พบตัวแปร script_key")
-	return
-end
-
--- 🎯 ดึง HWID ของผู้เล่น
 local hwid = game:GetService("RbxAnalyticsService"):GetClientId()
+print("HWID ของคุณคือ:", hwid)
 
--- 🌐 ดึงข้อมูลจาก Pastebin (Key:HWID)
-local success, data = pcall(function()
-	return game:HttpGet("https://pastebin.com/raw/JR3CMRg7")
-end)
+local validHWID = "2cc3efb5-6645-452d-b8ab-68ca78e459b0"
+local validKey = "XK39-FJ28-ZLQ1"
 
-if not success then
-	warn("❌ ดึงข้อมูลคีย์ไม่ได้: " .. tostring(data))
-	return
-end
-
--- 🔍 แปลงข้อมูลเป็นตาราง key -> hwid
-local validKeys = {}
-for line in data:gmatch("[^\r\n]+") do
-	local k, v = line:match("([^:]+):(.+)")
-	if k and v then
-		validKeys[k] = v
-	end
-end
-
--- ✅ ตรวจสอบว่า key นี้ตรงกับ HWID หรือไม่
-if validKeys[key] == hwid then
-	print("✅ Key และ HWID ถูกต้อง กำลังโหลดสคริปต์จริง...")
-	print("DONE")
+if script_key == validKey and hwid == validHWID then
+    print("DONE")
 else
-	warn("❌ Key หรือ HWID ไม่ถูกต้อง")
+    warn("Key หรือ HWID ไม่ถูกต้อง")
 end
