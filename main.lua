@@ -30,7 +30,7 @@ end
 -- ✅ ตรวจสอบว่า key นี้ตรงกับ HWID หรือไม่
 if validKeys[key] == hwid then
 	print("✅ Key และ HWID ถูกต้อง กำลังโหลดสคริปต์จริง...")
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/ADMINDOGG/loader/main/main.lua"))()
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/ADMINDOGG/loader/refs/heads/main/YA%20%3A%5C"))()
 else
 	warn("❌ Key หรือ HWID ไม่ถูกต้อง")
 end
