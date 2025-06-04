@@ -10,7 +10,7 @@ local hwid = game:GetService("RbxAnalyticsService"):GetClientId()
 
 -- 🌐 ดึงข้อมูลจาก Pastebin (Key:HWID)
 local success, data = pcall(function()
-	return game:HttpGet("https://pastebin.com/raw/C6NbcSDg")
+	return game:HttpGet("https://pastebin.com/raw/JR3CMRg7")
 end)
 
 if not success then
