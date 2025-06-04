@@ -5,13 +5,13 @@ if not script_key then
 end
 
 -- ดึง Key ที่ถูกต้องจาก Pastebin
-local correctKey = game:HttpGet("https://pastebin.com/raw/YOUR_KEY_PASTEBIN") -- เปลี่ยนลิงก์นี้
+local correctKey = game:HttpGet("https://pastebin.com/raw/cqUf9H1F") -- เปลี่ยนลิงก์นี้
 
 -- ดึง HWID จากผู้ใช้ (ClientId)
 local hwid = game:GetService("RbxAnalyticsService"):GetClientId()
 
 -- ดึง HWID ที่ได้รับอนุญาตจาก Pastebin
-local whitelistedHWIDs = game:HttpGet("https://pastebin.com/raw/YOUR_HWID_PASTEBIN")
+local whitelistedHWIDs = game:HttpGet("https://pastebin.com/raw/C6NbcSDg")
 
 -- แปลง HWID เป็น table
 local hwidList = {}
@@ -25,7 +25,7 @@ if script_key == correctKey then
 		print("✅ Key และ HWID ถูกต้อง กำลังโหลด Script จริง...")
 		
 		-- โหลด script จริง
-		loadstring(game:HttpGet("https://yourdomain.com/script.lua"))()
+		print("NIGGA")
 	else
 		warn("❌ HWID นี้ไม่ได้รับอนุญาต")
 	end
