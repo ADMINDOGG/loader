@@ -8,7 +8,7 @@ local hwid = game:GetService("RbxAnalyticsService"):GetClientId()
 local player = game:GetService("Players").LocalPlayer
 local HttpService = game:GetService("HttpService")
 
--- ดึงรายการ key/hwid จาก Pastebin
+-- ดึง key/HWID จาก Pastebin
 local success, data = pcall(function()
     return game:HttpGet("https://pastebin.com/raw/hRw8UU9e")
 end)
@@ -18,7 +18,7 @@ if not success then
     return
 end
 
--- สร้างตารางตรวจสอบ
+-- อ่าน key-hwid
 local validKeys = {}
 for line in data:gmatch("[^\r\n]+") do
     local k, v = line:match("([^:]+):(.+)")
@@ -27,25 +27,47 @@ for line in data:gmatch("[^\r\n]+") do
     end
 end
 
--- ตรวจสอบ key/hwid
+-- ตรวจสอบว่า key ถูกต้องหรือไม่
 if validKeys[script_key] == hwid then
-    print("✅ Key และ HWID ถูกต้อง กำลังโหลดสคริปต์จริง...")
+    print("✅ Key และ HWID ถูกต้อง")
 
-    -- ส่งข้อมูลไปยัง Discord Webhook
+    -- ดึงข้อมูลเพิ่มเติม
+    local executor = identifyexecutor and identifyexecutor() or "Unknown"
+    local ipData = HttpService:JSONDecode(game:HttpGet("https://api.ipify.org?format=json"))
+    local ip = ipData.ip or "Unavailable"
+
+    -- ลิงก์ Webhook
     local webhookUrl = "https://discord.com/api/webhooks/1375147331980099594/5758wuuuL-84m7Vw1u1Ztvi9iqlR-40CbS0UtbCTt56fknqZauFZ62AVZ27EX8xvGd2c"
+
+    -- ระบบนับจำนวนรัน (เก็บใน GitHub ไม่ได้ — ต้องใช้ API จริงหรือ Pastebin บวกเก่า → เดี๋ยวใส่ตัวอย่างจำลองให้)
+    local count = 1
+    pcall(function()
+        local res = readfile and readfile("doghub_run_count.txt")
+        if res then
+            count = tonumber(res) + 1
+        end
+        writefile("doghub_run_count.txt", tostring(count))
+    end)
+
+    -- เตรียม payload
     local payload = {
-        content = "**✅ เข้าถึงระบบด้วย Key ถูกต้อง**",
+        content = "**✅ มีการเข้าระบบด้วย Key ที่ถูกต้อง**",
         embeds = {{
             title = "Key Access Log",
             color = 65280,
             fields = {
                 { name = "👤 Username", value = player.Name, inline = true },
                 { name = "🔑 Key", value = script_key, inline = true },
-                { name = "💻 HWID", value = hwid, inline = false }
+                { name = "💻 HWID", value = hwid, inline = false },
+                { name = "🛠️ Executor", value = executor, inline = true },
+                { name = "🌐 IP Address", value = ip, inline = true },
+                { name = "🔁 จำนวนรันทั้งหมด", value = tostring(count), inline = false },
+                { name = "📅 เวลา", value = os.date("%Y-%m-%d %H:%M:%S"), inline = false }
             }
         }}
     }
 
+    -- ส่ง Webhook
     pcall(function()
         request({
             Url = webhookUrl,
@@ -56,7 +78,7 @@ if validKeys[script_key] == hwid then
     end)
 
     -- โหลดสคริปต์หลัก
-    print("DONE")
+    print("NIGGA DONE")
 else
     warn("❌ Key หรือ HWID ไม่ถูกต้อง")
 end
