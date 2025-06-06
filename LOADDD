@@ -10,7 +10,7 @@ local HttpService = game:GetService("HttpService")
 
 -- ดึง key/HWID จาก Pastebin
 local success, data = pcall(function()
-    return game:HttpGet("https://pastebin.com/raw/hRw8UU9e")
+    return game:HttpGet("https://pastebin.com/raw/QNuaKJtz")
 end)
 
 if not success then
