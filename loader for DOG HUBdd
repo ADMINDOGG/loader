@@ -1,10 +1,9 @@
+--DOGHUB
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
-local TextService = game:GetService("TextService")
-local HttpService = game:GetService("HttpService")
 
 local Library = {}
 Library.__index = Library
@@ -16,7 +15,6 @@ local Config = {
         Secondary = Color3.fromRGB(25, 25, 30),
         Tertiary = Color3.fromRGB(35, 35, 40),
         Accent = Color3.fromRGB(88, 101, 242),
-        AccentDark = Color3.fromRGB(70, 80, 200),
         Text = Color3.fromRGB(255, 255, 255),
         TextDark = Color3.fromRGB(160, 160, 160),
         TextDarker = Color3.fromRGB(120, 120, 120),
@@ -35,51 +33,20 @@ local function Create(class, properties)
     return obj
 end
 
-local function Tween(obj, props, time, style)
-    local info = TweenInfo.new(time or 0.2, style or Enum.EasingStyle.Quad)
+local function Tween(obj, props, time)
+    local info = TweenInfo.new(time or 0.2, Enum.EasingStyle.Quad)
     TweenService:Create(obj, info, props):Play()
-end
-
-local function RippleEffect(button)
-    local ripple = Create("Frame", {
-        Parent = button,
-        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-        BackgroundTransparency = 0.8,
-        BorderSizePixel = 0,
-        Position = UDim2.new(0.5, 0, 0.5, 0),
-        Size = UDim2.new(0, 0, 0, 0),
-        ZIndex = button.ZIndex + 1
-    })
-    
-    Create("UICorner", {
-        CornerRadius = UDim.new(1, 0),
-        Parent = ripple
-    })
-    
-    Tween(ripple, {
-        Size = UDim2.new(0, button.AbsoluteSize.X * 2, 0, button.AbsoluteSize.X * 2),
-        Position = UDim2.new(0.5, -button.AbsoluteSize.X, 0.5, -button.AbsoluteSize.X),
-        BackgroundTransparency = 1
-    }, 0.4)
-    
-    spawn(function()
-        wait(0.4)
-        ripple:Destroy()
-    end)
 end
 
 function Library:CreateWindow(options)
     options = options or {}
     local WindowName = options.Name or "DOG HUB"
     local LoadingEnabled = options.LoadingEnabled ~= false
-    local KeySystem = options.KeySystem or false
-    local Key = options.Key or ""
     
     local Window = {
         Tabs = {},
         CurrentTab = nil,
-        Flags = {},
-        Connections = {}
+        ScreenGui = nil
     }
     
     if CoreGui:FindFirstChild("DOGHUB_UI") then
@@ -92,6 +59,8 @@ function Library:CreateWindow(options)
         ResetOnSpawn = false,
         ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     })
+    
+    Window.ScreenGui = ScreenGui
     
     local MainFrame = Create("Frame", {
         Name = "MainFrame",
@@ -106,13 +75,6 @@ function Library:CreateWindow(options)
     Create("UICorner", {
         CornerRadius = UDim.new(0, 12),
         Parent = MainFrame
-    })
-    
-    Create("UIStroke", {
-        Parent = MainFrame,
-        Color = Config.Colors.Border,
-        Thickness = 1,
-        Transparency = 0.5
     })
     
     local TitleBar = Create("Frame", {
@@ -141,7 +103,7 @@ function Library:CreateWindow(options)
         Parent = TitleBar,
         BackgroundTransparency = 1,
         Position = UDim2.new(0, 15, 0, 0),
-        Size = UDim2.new(1, -100, 1, 0),
+        Size = UDim2.new(1, -80, 1, 0),
         Font = Enum.Font.GothamBold,
         Text = WindowName,
         TextColor3 = Config.Colors.Text,
@@ -149,30 +111,12 @@ function Library:CreateWindow(options)
         TextXAlignment = Enum.TextXAlignment.Left
     })
     
-    local MinimizeButton = Create("TextButton", {
-        Name = "MinimizeButton",
-        Parent = TitleBar,
-        BackgroundColor3 = Config.Colors.Warning,
-        BorderSizePixel = 0,
-        Position = UDim2.new(1, -65, 0.5, -8),
-        Size = UDim2.new(0, 16, 0, 16),
-        Font = Enum.Font.GothamBold,
-        Text = "–",
-        TextColor3 = Config.Colors.Text,
-        TextSize = 12
-    })
-    
-    Create("UICorner", {
-        CornerRadius = UDim.new(0, 3),
-        Parent = MinimizeButton
-    })
-    
     local CloseButton = Create("TextButton", {
         Name = "CloseButton",
         Parent = TitleBar,
         BackgroundColor3 = Config.Colors.Error,
         BorderSizePixel = 0,
-        Position = UDim2.new(1, -40, 0.5, -8),
+        Position = UDim2.new(1, -30, 0.5, -8),
         Size = UDim2.new(0, 16, 0, 16),
         Font = Enum.Font.GothamBold,
         Text = "×",
@@ -190,7 +134,7 @@ function Library:CreateWindow(options)
         Parent = MainFrame,
         BackgroundTransparency = 1,
         Position = UDim2.new(0, 10, 0, 50),
-        Size = UDim2.new(0, 140, 1, -60)
+        Size = UDim2.new(0, 140, 1, -70)
     })
     
     Create("UIListLayout", {
@@ -204,7 +148,7 @@ function Library:CreateWindow(options)
         Parent = MainFrame,
         BackgroundTransparency = 1,
         Position = UDim2.new(0, 160, 0, 50),
-        Size = UDim2.new(1, -170, 1, -60)
+        Size = UDim2.new(1, -170, 1, -70)
     })
     
     local StatusBar = Create("Frame", {
@@ -214,11 +158,6 @@ function Library:CreateWindow(options)
         BorderSizePixel = 0,
         Position = UDim2.new(0, 0, 1, -20),
         Size = UDim2.new(1, 0, 0, 20)
-    })
-    
-    Create("UICorner", {
-        CornerRadius = UDim.new(0, 0),
-        Parent = StatusBar
     })
     
     local StatusLabel = Create("TextLabel", {
@@ -259,57 +198,14 @@ function Library:CreateWindow(options)
             TextSize = 16
         })
         
-        local LoadingBar = Create("Frame", {
-            Parent = LoadingFrame,
-            BackgroundColor3 = Config.Colors.Secondary,
-            BorderSizePixel = 0,
-            Position = UDim2.new(0.5, -100, 0.5, 10),
-            Size = UDim2.new(0, 200, 0, 4)
-        })
-        
-        Create("UICorner", {
-            CornerRadius = UDim.new(0, 2),
-            Parent = LoadingBar
-        })
-        
-        local LoadingProgress = Create("Frame", {
-            Parent = LoadingBar,
-            BackgroundColor3 = Config.Colors.Accent,
-            BorderSizePixel = 0,
-            Size = UDim2.new(0, 0, 1, 0)
-        })
-        
-        Create("UICorner", {
-            CornerRadius = UDim.new(0, 2),
-            Parent = LoadingProgress
-        })
-        
         spawn(function()
-            for i = 0, 100, 2 do
-                LoadingProgress.Size = UDim2.new(i/100, 0, 1, 0)
-                LoadingText.Text = "Loading DOG HUB... " .. i .. "%"
-                wait(0.02)
-            end
+            wait(1)
             Tween(LoadingFrame, {BackgroundTransparency = 1}, 0.3)
             Tween(LoadingText, {TextTransparency = 1}, 0.3)
-            Tween(LoadingBar, {BackgroundTransparency = 1}, 0.3)
-            Tween(LoadingProgress, {BackgroundTransparency = 1}, 0.3)
             wait(0.3)
             LoadingFrame:Destroy()
         end)
     end
-    
-    local minimized = false
-    MinimizeButton.MouseButton1Click:Connect(function()
-        minimized = not minimized
-        if minimized then
-            Tween(MainFrame, {Size = UDim2.new(0, 580, 0, 40)}, 0.3)
-            MinimizeButton.Text = "+"
-        else
-            Tween(MainFrame, {Size = Config.WindowSize}, 0.3)
-            MinimizeButton.Text = "–"
-        end
-    end)
     
     local dragging = false
     local dragInput, mousePos, framePos
@@ -349,7 +245,6 @@ function Library:CreateWindow(options)
     function Window:CreateTab(options)
         options = options or {}
         local TabName = options.Name or "Tab"
-        local TabIcon = options.Icon or ""
         
         local Tab = {
             Elements = {}
@@ -399,7 +294,6 @@ function Library:CreateWindow(options)
         end
         
         TabButton.MouseButton1Click:Connect(function()
-            RippleEffect(TabButton)
             for _, tab in pairs(Window.Tabs) do
                 tab.Content.Visible = false
                 Tween(tab.Button, {
@@ -421,8 +315,11 @@ function Library:CreateWindow(options)
         table.insert(Window.Tabs, Tab)
         
         local function UpdateCanvasSize()
-            local contentSize = TabContent.UIListLayout.AbsoluteContentSize.Y
-            TabContent.CanvasSize = UDim2.new(0, 0, 0, contentSize + 20)
+            spawn(function()
+                wait()
+                local contentSize = TabContent.UIListLayout.AbsoluteContentSize.Y
+                TabContent.CanvasSize = UDim2.new(0, 0, 0, contentSize + 20)
+            end)
         end
         
         function Tab:CreateButton(options)
@@ -448,15 +345,7 @@ function Library:CreateWindow(options)
                 Parent = Button
             })
             
-            Create("UIStroke", {
-                Parent = Button,
-                Color = Config.Colors.Border,
-                Thickness = 1,
-                Transparency = 0.8
-            })
-            
             Button.MouseButton1Click:Connect(function()
-                RippleEffect(Button)
                 Tween(Button, {BackgroundColor3 = Config.Colors.Accent}, 0.1)
                 spawn(function()
                     wait(0.1)
@@ -488,13 +377,6 @@ function Library:CreateWindow(options)
             Create("UICorner", {
                 CornerRadius = UDim.new(0, 6),
                 Parent = ToggleFrame
-            })
-            
-            Create("UIStroke", {
-                Parent = ToggleFrame,
-                Color = Config.Colors.Border,
-                Thickness = 1,
-                Transparency = 0.8
             })
             
             local ToggleLabel = Create("TextLabel", {
@@ -584,13 +466,6 @@ function Library:CreateWindow(options)
             Create("UICorner", {
                 CornerRadius = UDim.new(0, 6),
                 Parent = SliderFrame
-            })
-            
-            Create("UIStroke", {
-                Parent = SliderFrame,
-                Color = Config.Colors.Border,
-                Thickness = 1,
-                Transparency = 0.8
             })
             
             local SliderLabel = Create("TextLabel", {
@@ -726,13 +601,6 @@ function Library:CreateWindow(options)
                 Parent = DropdownFrame
             })
             
-            Create("UIStroke", {
-                Parent = DropdownFrame,
-                Color = Config.Colors.Border,
-                Thickness = 1,
-                Transparency = 0.8
-            })
-            
             local DropdownButton = Create("TextButton", {
                 Parent = DropdownFrame,
                 BackgroundTransparency = 1,
@@ -800,7 +668,6 @@ function Library:CreateWindow(options)
                     expanded = false
                     Tween(DropdownFrame, {Size = UDim2.new(1, -10, 0, 35)}, 0.2)
                     Tween(OptionsContainer, {Size = UDim2.new(1, 0, 0, 0)}, 0.2)
-                    Tween(DropdownIcon, {Rotation = 0}, 0.2)
                     
                     pcall(Callback, CurrentValue)
                 end)
@@ -820,12 +687,11 @@ function Library:CreateWindow(options)
                     local optionsHeight = #Options * 25
                     Tween(DropdownFrame, {Size = UDim2.new(1, -10, 0, 35 + optionsHeight)}, 0.2)
                     Tween(OptionsContainer, {Size = UDim2.new(1, 0, 0, optionsHeight)}, 0.2)
-                    Tween(DropdownIcon, {Rotation = 180}, 0.2)
                 else
                     Tween(DropdownFrame, {Size = UDim2.new(1, -10, 0, 35)}, 0.2)
                     Tween(OptionsContainer, {Size = UDim2.new(1, 0, 0, 0)}, 0.2)
-                    Tween(DropdownIcon, {Rotation = 0}, 0.2)
                 end
+                UpdateCanvasSize()
             end)
             
             table.insert(Tab.Elements, DropdownFrame)
@@ -835,9 +701,6 @@ function Library:CreateWindow(options)
                 SetValue = function(value)
                     CurrentValue = value
                     DropdownButton.Text = DropdownName .. ": " .. CurrentValue
-                end,
-                AddOption = function(option)
-                    table.insert(Options, option)
                 end
             }
         end
@@ -861,13 +724,6 @@ function Library:CreateWindow(options)
             Create("UICorner", {
                 CornerRadius = UDim.new(0, 6),
                 Parent = TextBoxFrame
-            })
-            
-            Create("UIStroke", {
-                Parent = TextBoxFrame,
-                Color = Config.Colors.Border,
-                Thickness = 1,
-                Transparency = 0.8
             })
             
             local TextBoxLabel = Create("TextLabel", {
@@ -938,13 +794,6 @@ function Library:CreateWindow(options)
             Create("UICorner", {
                 CornerRadius = UDim.new(0, 6),
                 Parent = KeybindFrame
-            })
-            
-            Create("UIStroke", {
-                Parent = KeybindFrame,
-                Color = Config.Colors.Border,
-                Thickness = 1,
-                Transparency = 0.8
             })
             
             local KeybindLabel = Create("TextLabel", {
@@ -1029,13 +878,6 @@ function Library:CreateWindow(options)
                 Parent = ColorPickerFrame
             })
             
-            Create("UIStroke", {
-                Parent = ColorPickerFrame,
-                Color = Config.Colors.Border,
-                Thickness = 1,
-                Transparency = 0.8
-            })
-            
             local ColorPickerLabel = Create("TextLabel", {
                 Parent = ColorPickerFrame,
                 BackgroundTransparency = 1,
@@ -1059,12 +901,6 @@ function Library:CreateWindow(options)
             Create("UICorner", {
                 CornerRadius = UDim.new(0, 4),
                 Parent = ColorDisplay
-            })
-            
-            Create("UIStroke", {
-                Parent = ColorDisplay,
-                Color = Config.Colors.Border,
-                Thickness = 1
             })
             
             local ColorButton = Create("TextButton", {
@@ -1135,6 +971,7 @@ function Library:CreateWindow(options)
                 BackgroundColor3 = Config.Colors.Border,
                 BorderSizePixel = 0,
                 Size = UDim2.new(1, -20, 0, 1),
+                Position = UDim2.new(0, 10, 0, 0),
                 LayoutOrder = #Tab.Elements + 1
             })
             
@@ -1186,13 +1023,12 @@ function Library:CreateWindow(options)
         local Title = options.Title or "Notification"
         local Content = options.Content or "This is a notification"
         local Duration = options.Duration or 3
-        local Image = options.Image or ""
         
         local NotificationFrame = Create("Frame", {
-            Parent = ScreenGui,
+            Parent = Window.ScreenGui,
             BackgroundColor3 = Config.Colors.Secondary,
             BorderSizePixel = 0,
-            Position = UDim2.new(1, -320, 0, 20),
+            Position = UDim2.new(1, 20, 0, 20),
             Size = UDim2.new(0, 300, 0, 80),
             ZIndex = 1000
         })
@@ -1200,12 +1036,6 @@ function Library:CreateWindow(options)
         Create("UICorner", {
             CornerRadius = UDim.new(0, 8),
             Parent = NotificationFrame
-        })
-        
-        Create("UIStroke", {
-            Parent = NotificationFrame,
-            Color = Config.Colors.Accent,
-            Thickness = 2
         })
         
         local NotificationTitle = Create("TextLabel", {
